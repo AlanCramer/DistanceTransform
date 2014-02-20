@@ -4,9 +4,11 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     lodepng.cpp \
-    acimage.cpp
+    acimage.cpp \
+    disttransutil.cpp
 
 HEADERS += \
     lodepng.h \
-    acimage.h
+    acimage.h \
+    disttransutil.h
 

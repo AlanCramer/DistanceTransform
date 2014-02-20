@@ -1,6 +1,7 @@
 #include <iostream>
 #include "lodepng.h"
 #include "acimage.h"
+#include "disttransutil.h"
 
 using namespace std;
 
@@ -35,6 +36,11 @@ int main(int argc, char** argv)
     if (acimage.loadSuccess())
     {
         acimage.debugDump();
+        AcImage trf = acimage;
+
+        DistTransUtil::ComputeDistTrans(acimage, trf);
+
+        trf.debugDump();
     }
 
     return 0;
