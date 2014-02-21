@@ -41,6 +41,9 @@ int main(int argc, char** argv)
         DistTransUtil::ComputeDistTrans(acimage, trf);
 
         trf.debugDump();
+
+        DistTransUtil utils;
+
     }
 
     return 0;

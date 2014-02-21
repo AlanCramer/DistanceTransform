@@ -39,7 +39,7 @@ public:
     unsigned int m_width;
     unsigned int m_height;
 
-    const char* m_filename;
+//    const char* m_filename;
     unsigned int m_loadStatus;
 };
 

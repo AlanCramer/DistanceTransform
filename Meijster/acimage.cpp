@@ -28,7 +28,7 @@ AcImage::AcImage()
 // true if all okay
 bool AcImage::loadImage(const char *filename)
 {
-    m_filename = filename;
+//    m_filename = filename;
     unsigned int err = lodepng::decode(m_pixels, m_width, m_height, filename, LCT_GREY,8);
 
     m_loadStatus = err;
