@@ -27,8 +27,12 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    //DistTransUtil utils;
     AcImage acimage;
     acimage.loadImage(filename);
+    AcImage trf = acimage;
+    AcImage vectorized = acimage;
+
 
     cout << "Attempted read of " <<  filename << endl;
     cout << "  " << acimage.getLoadStatusText() << endl;
@@ -36,14 +40,13 @@ int main(int argc, char** argv)
     if (acimage.loadSuccess())
     {
         acimage.debugDump();
-        AcImage trf = acimage;
 
         DistTransUtil::ComputeDistTrans(acimage, trf);
 
         trf.debugDump();
 
         DistTransUtil utils;
-
+        utils.VectorizeDistanceTrf(trf, vectorized);
     }
 
     return 0;

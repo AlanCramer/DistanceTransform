@@ -14,8 +14,9 @@ public:
     DistTransUtil() ;
 
     // each pixel in 'out' will be the Euclidean distance squared to the nearest 0 in 'in'
-    static void ComputeDistTrans(const AcImage& in, AcImage& dt);
+    static void ComputeDistTrans(const AcImage &in, AcImage& dt);
 
+    static void debugDumpImageAsDir(const AcImage& img);
 
     enum Direction{
         North,
@@ -34,9 +35,10 @@ public:
         Boundary // meaning this neighbor is out of bounds
     };
 
-
-
-    void VectorizeImage(const AcImage* in, AcImage& out);
+    Direction nbrhdToDir(uint8_t nw, uint8_t nn, uint8_t ne,
+                         uint8_t ww, uint8_t cc, uint8_t ee,
+                         uint8_t sw, uint8_t ss, uint8_t se);
+    void VectorizeDistanceTrf(AcImage dt, AcImage& out);
 
 private:
     void initDirectionMap();
