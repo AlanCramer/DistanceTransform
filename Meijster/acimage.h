@@ -27,8 +27,8 @@ public:
 
     void getNbrhd(unsigned int x, unsigned int y, uint8_t* nw, uint8_t* nn, uint8_t* ne, uint8_t* ww, uint8_t* cc, uint8_t* ee, uint8_t* sw, uint8_t* ss, uint8_t* se);
 
-    AcBitDepthType& getImageAt(unsigned int x, unsigned int y) { return m_pixels[m_width * x + y]; }
-    const AcBitDepthType& getImageAt(unsigned int x, unsigned int y) const { return m_pixels[m_width * x + y]; }
+    AcBitDepthType& getImageAt(unsigned int x, unsigned int y) { return m_pixels[m_width * y + x]; }
+    const AcBitDepthType& getImageAt(unsigned int x, unsigned int y) const { return m_pixels[m_width * y + x]; }
 
     void setWidth(unsigned int width) { m_width = width; }
     unsigned int getWidth() const { return m_width; }

@@ -1,6 +1,7 @@
 #ifndef DISTTRANSUTIL_H
 #define DISTTRANSUTIL_H
 
+#include <iostream>
 #include <map>
 #include "acimage.h"
 
@@ -40,9 +41,31 @@ public:
                          uint8_t sw, uint8_t ss, uint8_t se);
     void VectorizeDistanceTrf(AcImage dt, AcImage& out);
 
+    void dumpDirMap(const char *filename);
+
 private:
     void initDirectionMap();
     DirectionMap m_directionMap;
 };
+
+
+inline std::ostream& operator<<(std::ostream& out, const DistTransUtil::Direction value){
+    const char* s = 0;
+#define PROCESS_VAL(p) case(p): s = #p; break;
+    switch(value){
+        PROCESS_VAL(DistTransUtil::North);
+        PROCESS_VAL(DistTransUtil::East);
+        PROCESS_VAL(DistTransUtil::South);
+        PROCESS_VAL(DistTransUtil::West);
+        PROCESS_VAL(DistTransUtil::Corner);
+        PROCESS_VAL(DistTransUtil::Stop);
+    default:
+            s= "unknown Direction value";
+    }
+#undef PROCESS_VAL
+
+    return out << s;
+}
+
 
 #endif // DISTTRANSUTIL_H

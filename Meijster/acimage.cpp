@@ -47,9 +47,9 @@ void AcImage::debugDump() const
 
 void AcImage::maskImage(AcBitDepthType value)
 {
-    for (unsigned int i = 0; i < m_height; ++i)
+    for (unsigned int i = 0; i < m_width; ++i)
     {
-        for (unsigned int j = 0; j < m_width; ++j)
+        for (unsigned int j = 0; j < m_height; ++j)
         {
             if (getImageAt(i,j) != value)
                 getImageAt(i,j) = 0;
@@ -59,9 +59,9 @@ void AcImage::maskImage(AcBitDepthType value)
 
 void AcImage::thresholdImage(AcBitDepthType value)
 {
-    for (unsigned int i = 0; i < m_height; ++i)
+    for (unsigned int i = 0; i < m_width; ++i)
     {
-        for (unsigned int j = 0; j < m_width; ++j)
+        for (unsigned int j = 0; j < m_height; ++j)
         {
             getImageAt(i,j) =(getImageAt(i,j) <= value)? value : 0;
         }

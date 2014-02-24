@@ -1,5 +1,6 @@
 #include "disttransutil.h"
 #include "iostream"
+#include "fstream"
 
 using namespace std;
 
@@ -23,13 +24,49 @@ int EDT_f(const AcImage& G, unsigned int y, int x, int i)
 // for the vectorization
 namespace
 {
-    uint32_t encodeNbrhd(uint8_t nw, uint8_t nn, uint8_t ne,
-                                uint8_t ww, uint8_t cc, uint8_t ee,
-                                uint8_t sw, uint8_t ss, uint8_t se)
+    void decodeNbrhd(uint32_t nbr,
+                     std::vector<uint8_t>& nbrhd)
     {
-        return  (nw <<  0) + (nn <<  2) + (ne <<  4) +
-                (ww <<  6) + (cc <<  8) + (ee << 10) +
-                (sw << 12) + (ss << 14) + (se << 16);
+        uint8_t ones, twos;
+        nbrhd.clear();
+        //std::vector<uint8_t> nbrhd;
+
+        while(nbr)
+        {
+            ones = twos = 0;
+            if (nbr&1)
+                ones = 1;
+
+            nbr>>=1;
+
+            if (nbr&1)
+                twos = 1;
+
+            nbr>>=1;
+
+            unsigned int res = (ones&&twos) ? 3 : (twos) ? 2: (ones) ? 1 :0;
+            nbrhd.push_back(res);
+        }
+    }
+
+    uint32_t encodeNbrhd(uint8_t nw, uint8_t nn, uint8_t ne,
+                         uint8_t ww, uint8_t cc, uint8_t ee,
+                         uint8_t sw, uint8_t ss, uint8_t se)
+    {
+        uint32_t en1 = nw << 0;
+        uint32_t en2 = nn << 2;
+        uint32_t en3 = ne << 4;
+        uint32_t en4 = ww << 6;
+        uint32_t en5 = cc << 8;
+        uint32_t en6 = ee << 10;
+        uint32_t en7 = sw << 12;
+        uint32_t en8 = ss << 14;
+        uint32_t en9 = se << 16;
+
+        return en1 + en2 + en3 + en4 + en5 + en6 + en7 + en8 + en9;
+//        return  (nw <<  0) + (nn <<  2) + (ne <<  4) +
+//                (ww <<  6) + (cc <<  8) + (ee << 10) +
+//                (sw << 12) + (ss << 14) + (se << 16);
     }
 
     uint32_t encodeNbrhdRot90(uint8_t nw, uint8_t nn, uint8_t ne,
@@ -121,6 +158,18 @@ namespace
                         uint8_t sw, uint8_t ss, uint8_t se,
                         DistTransUtil::Direction dir)
     {
+        uint32_t en = encodeNbrhd(nw, nn, ne, ww, cc, ee, sw, ss, se);
+        std::vector<uint8_t> de;
+        decodeNbrhd(en, de);
+
+        uint32_t en90 = encodeNbrhdRot90(nw, nn, ne, ww, cc, ee, sw, ss, se);
+        uint32_t en180 = encodeNbrhdRot180(nw, nn, ne, ww, cc, ee, sw, ss, se);
+        uint32_t en270 = encodeNbrhdRot270(nw, nn, ne, ww, cc, ee, sw, ss, se);
+
+        DistTransUtil::Direction dir90 = RotDir90(dir);
+        DistTransUtil::Direction dir180 = RotDir180(dir);
+        DistTransUtil::Direction dir270 = RotDir270(dir);
+
         dirMap[encodeNbrhd(nw, nn, ne, ww, cc, ee, sw, ss, se)] = dir;
         dirMap[encodeNbrhdRot90(nw, nn, ne, ww, cc, ee, sw, ss, se)] = RotDir90(dir);
         dirMap[encodeNbrhdRot180(nw, nn, ne, ww, cc, ee, sw, ss, se)] = RotDir180(dir);
@@ -133,6 +182,7 @@ namespace
 DistTransUtil::DistTransUtil()
 {
     initDirectionMap();
+    dumpDirMap("dirmapfile.txt");
 }
 
 void DistTransUtil::ComputeDistTrans(const AcImage &in, AcImage &dt)
@@ -227,9 +277,9 @@ void DistTransUtil::debugDumpImageAsDir(const AcImage &img)
     unsigned int width = img.getWidth();
     unsigned int height = img.getHeight();
 
-    for (unsigned int i = 0; i < width; ++i)
+    for (unsigned int j = 0; j < height; ++j)
     {
-        for (unsigned int j = 0; j < height; ++j)
+        for (unsigned int i = 0; i < width; ++i)
         {
             dir = (Direction) img(i,j);
 
@@ -286,16 +336,56 @@ void DistTransUtil::VectorizeDistanceTrf(AcImage dt, AcImage &out)
     uint8_t ss;
     uint8_t se;
 
+    uint32_t ennb;
+
     for (unsigned int i = 1; i < dt.getWidth()-1; ++i)
     {
         for (unsigned int j = 1; j < dt.getHeight()-1; ++j)
         {
             dt.getNbrhd(i, j, &nw,&nn,&ne,&ww,&cc,&ee,&sw,&ss,&se);
-            out(i,j) = nbrhdToDir(nw,nn,ne,ee,cc,ww,sw,ss,se);
+
+            ennb = encodeNbrhd(nw,nn,ne,ww,cc,ee,sw,ss,se);
+
+            Direction dir = nbrhdToDir(nw,nn,ne,ww,cc,ee,sw,ss,se);
+
+            if (dir != DistTransUtil::Stop)
+            {
+                cout.width(3);
+                cout << i << " " << j << " " << ennb << " " << dir << endl;
+            }
+
+            out(i,j) = dir;
         }
     }
 
     debugDumpImageAsDir(out);
+}
+
+void DistTransUtil::dumpDirMap(const char* filename)
+{
+    ofstream outfile;
+    outfile.open(filename);
+
+    //vector<uint32_t> v;
+    for(DirectionMap::iterator it = m_directionMap.begin(); it != m_directionMap.end(); ++it) {
+      //v.push_back(it->first);
+        uint32_t nbrs = it->first;
+        std::vector<uint8_t> nbrhd;
+        nbrhd.resize(9, 0);
+        decodeNbrhd(nbrs, nbrhd);
+        outfile << it->second << " " << it->first << endl;
+
+
+        // dump neighborhood
+        for (uint8_t i = 0; i < 3; ++i)
+        {
+            for (uint8_t j = 0; j < 3; ++j)
+            {
+                outfile << (int) nbrhd[3*i+j] << " ";
+            }
+            outfile << endl;
+        }
+    }
 }
 
 
