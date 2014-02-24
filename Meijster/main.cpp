@@ -47,6 +47,8 @@ int main(int argc, char** argv)
 
         DistTransUtil utils;
         utils.VectorizeDistanceTrf(trf, vectorized);
+
+        DistTransUtil::debugDumpImageAsDir(vectorized);
     }
 
     return 0;

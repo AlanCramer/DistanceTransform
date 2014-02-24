@@ -158,18 +158,6 @@ namespace
                         uint8_t sw, uint8_t ss, uint8_t se,
                         DistTransUtil::Direction dir)
     {
-        uint32_t en = encodeNbrhd(nw, nn, ne, ww, cc, ee, sw, ss, se);
-        std::vector<uint8_t> de;
-        decodeNbrhd(en, de);
-
-        uint32_t en90 = encodeNbrhdRot90(nw, nn, ne, ww, cc, ee, sw, ss, se);
-        uint32_t en180 = encodeNbrhdRot180(nw, nn, ne, ww, cc, ee, sw, ss, se);
-        uint32_t en270 = encodeNbrhdRot270(nw, nn, ne, ww, cc, ee, sw, ss, se);
-
-        DistTransUtil::Direction dir90 = RotDir90(dir);
-        DistTransUtil::Direction dir180 = RotDir180(dir);
-        DistTransUtil::Direction dir270 = RotDir270(dir);
-
         dirMap[encodeNbrhd(nw, nn, ne, ww, cc, ee, sw, ss, se)] = dir;
         dirMap[encodeNbrhdRot90(nw, nn, ne, ww, cc, ee, sw, ss, se)] = RotDir90(dir);
         dirMap[encodeNbrhdRot180(nw, nn, ne, ww, cc, ee, sw, ss, se)] = RotDir180(dir);
@@ -221,9 +209,9 @@ void DistTransUtil::ComputeDistTrans(const AcImage &in, AcImage &dt)
         }
     }
 
-    std::cout << "\n\nG(x,y) :\n" << std::endl;
-    g.debugDump();
-    std::cout << "\n\n" << std::endl;
+//    std::cout << "\n\nG(x,y) :\n" << std::endl;
+//    g.debugDump();
+//    std::cout << "\n\n" << std::endl;
 
     // Phase 2
     // need f and Sep (defined above)
@@ -323,7 +311,7 @@ DistTransUtil::Direction DistTransUtil::nbrhdToDir(uint8_t nw, uint8_t nn, uint8
 void DistTransUtil::VectorizeDistanceTrf(AcImage dt, AcImage &out)
 {
     dt.thresholdImage(1);
-    dt.debugDump();
+//    dt.debugDump();
     out = dt;
 
     uint8_t nw;
@@ -347,18 +335,17 @@ void DistTransUtil::VectorizeDistanceTrf(AcImage dt, AcImage &out)
             ennb = encodeNbrhd(nw,nn,ne,ww,cc,ee,sw,ss,se);
 
             Direction dir = nbrhdToDir(nw,nn,ne,ww,cc,ee,sw,ss,se);
-
-            if (dir != DistTransUtil::Stop)
-            {
-                cout.width(3);
-                cout << i << " " << j << " " << ennb << " " << dir << endl;
-            }
-
             out(i,j) = dir;
+
+//            if (dir != DistTransUtil::Stop)
+//            {
+//                cout.width(3);
+//                cout << i << " " << j << " " << ennb << " " << dir << endl;
+//            }
+
+
         }
     }
-
-    debugDumpImageAsDir(out);
 }
 
 void DistTransUtil::dumpDirMap(const char* filename)
