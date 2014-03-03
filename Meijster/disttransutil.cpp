@@ -239,7 +239,7 @@ void DistTransUtil::ComputeDistTrans(const AcImage &in, AcImage &dt)
             else
             {
                 int w = 1 + Sep(g, j, s[q], u);
-                if (w < 0 || (unsigned) w < m) // is w <0 possible?
+                if (w < m)
                 {
                     ++q;
                     s[q] = u;
